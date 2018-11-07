@@ -35,6 +35,17 @@ var logFuncsSlice = []logFuncType{noOpLogMsg, noOpLogMsg, noOpLogMsg, noOpLogMsg
 
 where noOpLogMsg is a method which does nothing  
 and logMsg is just a wrapper around the standard library log.Printf  
+* The index of each element in the array represents the log level (0=TRACE,1=DEBUG, etc.)
+* Thus, the methods exposed by the *alog* package are :
+```shell
+alog.Trace(string, ...interface{})
+alog.Debug(string, ...interface{})
+alog.Info(string, ...interface{})
+alog.Warn(string, ...interface{})
+alog.Error(string, ...interface{})
+alog.Critical(string, ...interface{})
+```
 
-## Other packages used
+## Other package(s) used
 Hashicorp HCL
+golang based library for levelled logging
