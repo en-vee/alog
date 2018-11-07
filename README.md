@@ -1,13 +1,13 @@
 # alog
-*alog* is a golang implementation of levelled logging.  
-It wraps the log package from the standard library and provides methods for logging at the following levels (which do not get written to the log if the log level is lower than the configured value in alog.conf) :
+* **alog** is a golang implementation of levelled logging.  
+* It wraps the log package from the standard library and provides methods for logging at the following levels (which do not get written to the log if the log level is lower than the configured value in alog.conf) :
 - TRACE
 - DEBUG
 - INFO
 - WARN
 - ERROR
 - CRITICAL
-
+* The biggest advantage this package offers is that there is no per-call expensive check of the level of logging. This is all determined in the *init* function of the package which creates pointers to the correct function which is to be used for logging
 
 ## Getting It
 go get -u "github.com/en-vee/alog"
