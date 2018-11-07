@@ -46,6 +46,11 @@ alog.Warn(string, ...interface{})
 alog.Error(string, ...interface{})
 alog.Critical(string, ...interface{})
 ```
+* Sample Log Message
+```shell
+018/11/07 18:03:25 [ERROR]      - This is an ERROR message.
+```
+
 
 ## Other package(s) used
 Hashicorp HCL
