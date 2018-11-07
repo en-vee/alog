@@ -48,7 +48,7 @@ alog.Critical(string, ...interface{})
 ```
 * Sample Log Message
 ```shell
-018/11/07 18:03:25 [ERROR]      - This is an ERROR message.
+2018/11/07 18:03:25 [ERROR]      - This is an ERROR message.
 ```
 
 
