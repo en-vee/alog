@@ -21,8 +21,7 @@ TRACE
 DEBUG
 INFO
 WARNING
-MINOR
-MAJOR
+ERROR
 CRITICAL
 */
 
@@ -45,7 +44,6 @@ const (
 
 // Logging Function type
 type logFuncType func(LogLevel, string, ...interface{})
-type StringInterfaceMap map[string]interface{}
 
 // Array containing function values which perform the actual logging
 // Initialized with NoOp logger for all log levels except CRITICAL
@@ -97,7 +95,7 @@ func init() {
 	}
 	// If not present, then attempt to read from Environment Variable AXLRATE_LOGGER_CONF_DIR
 	if !useLocal {
-		if logConfDir, ok := os.LookupEnv("AXLRATE_LOGGER_CONF_DIR"); !ok {
+		if logConfDir, ok := os.LookupEnv("ALOG_CONF_DIR"); !ok {
 			if fileContents, err := ioutil.ReadFile(fmt.Sprintf("%s%c%s", logConfDir, os.PathSeparator, loggerConfigFileName)); err == nil {
 				decodeConfFile(fileContents)
 				logFileName := fmt.Sprintf("%s%c%s", theConfig.filePath, os.PathSeparator, theConfig.fileName)
