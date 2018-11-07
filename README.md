@@ -16,6 +16,7 @@ go get -u "github.com/en-vee/alog"
 ```shell
 fileName = "myapp.log"
 filePath = "/var/log/myapp"
+# Valid Values = TRACE|DEBUG|INFO|WARN|ERROR|CRITICAL
 logLevel = "INFO"
 ```
 The config options in the above file are self-explanatory.
