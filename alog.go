@@ -6,13 +6,11 @@ package alog
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"sync"
 
-	"github.com/hashicorp/hcl"
-	"github.com/mitchellh/mapstructure"
+	"github.com/en-vee/aconf"
 )
 
 /*
@@ -26,13 +24,15 @@ CRITICAL
 */
 
 var (
-	loggerConfigFileName       = "alog.conf"
-	logDestination             = os.Stdout
-	logLevel             uint8 = 1
+	loggerConfigFileName = "alog.conf"
+	logDestination       = os.Stdout
+	logLevel             LogLevel
 )
 
+// LogLevel is the type used to specify the log level
 type LogLevel uint8
 
+// The log level constants specify the log levels which can be accepted
 const (
 	TRACE LogLevel = iota
 	DEBUG
@@ -76,56 +76,54 @@ type loggerConf struct {
 var theConfig loggerConf
 
 func init() {
+	// Is alog.conf present in local folder ?
+	// 	If yes,
+	// 	Instantiate an io.Reader using the file name alog.conf
+	// If not, then check if ALOG_CONF_DIR environment variable has been defined.
+	// 		If yes, then attempt to create an io.Reader from alog.conf.
+	// If reader is still nil, then just set destination output to stdout
 
-	//log.SetFlags(0)
+	var ok bool
+	configParser := &aconf.HoconParser{}
+	alogConfig := &struct {
+		Alog struct {
+			FileName string `hocon:"fileName"`
+			LogLevel string `hocon:"logLevel"`
+		} `hocon:"alog"`
+	}{}
 
-	var useLocal bool
-
-	// Read in axlrate-logger.conf from current folder
-	// Slurp read whole file into buffer
-	if fileContents, err := ioutil.ReadFile(loggerConfigFileName); err == nil {
-		decodeConfFile(fileContents)
-		useLocal = true
-		logFileName := fmt.Sprintf("%s%c%s", theConfig.filePath, os.PathSeparator, theConfig.fileName)
-		var err error
-		logDestination, err = os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-		if err != nil {
-			fmt.Printf("Error creating log destination handle %v", err)
-		}
+	// Select logger config file, giving priority to local alog.conf
+	if logConfDir, ok := os.LookupEnv("ALOG_CONF_DIR"); ok && !fileExists("alog.conf") {
+		loggerConfigFileName = fmt.Sprintf("%s%c%s", logConfDir, os.PathSeparator, "alog.conf")
 	}
-	// If not present, then attempt to read from Environment Variable AXLRATE_LOGGER_CONF_DIR
-	if !useLocal {
-		if logConfDir, ok := os.LookupEnv("ALOG_CONF_DIR"); !ok {
-			if fileContents, err := ioutil.ReadFile(fmt.Sprintf("%s%c%s", logConfDir, os.PathSeparator, loggerConfigFileName)); err == nil {
-				decodeConfFile(fileContents)
-				logFileName := fmt.Sprintf("%s%c%s", theConfig.filePath, os.PathSeparator, theConfig.fileName)
-				logDestination, _ = os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+
+	if reader, err := os.Open(loggerConfigFileName); err == nil {
+		if err := configParser.Parse(reader, alogConfig); err == nil {
+			if len(alogConfig.Alog.FileName) != 0 {
+				logDestination, err = os.OpenFile(alogConfig.Alog.FileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "alog: unable to open log file : "+alogConfig.Alog.FileName+". Error : "+err.Error())
+					logDestination = os.Stdout
+				}
+			}
+
+			if logLevel, ok = logStringToIntLevelMap[alogConfig.Alog.LogLevel]; !ok {
+				fmt.Println("alog: invalid log level specified :", alogConfig.Alog.LogLevel, "Using default level of TRACE")
 			}
 		}
 	}
-	SetLogLevel(theConfig.logLevel)
+
+	SetLogLevel(logLevel)
 	log.SetOutput(logDestination)
 
 }
 
-func decodeConfFile(fileContents []byte) {
-	var v interface{}
-	//var theConfig loggerConf
-	if err := hcl.Unmarshal(fileContents, &v); err == nil {
-		if err := mapstructure.Decode(v, &theConfig); err == nil {
-			if val, ok := v.(map[string]interface{})["fileName"].(string); ok {
-				theConfig.fileName = val
-			}
-			if val, ok := v.(map[string]interface{})["filePath"].(string); ok {
-				theConfig.filePath = val
-			}
-			if val, ok := (v.(map[string]interface{})["logLevel"]).(string); ok {
-				theConfig.logLevel = logStringToIntLevelMap[val]
-				//fmt.Println(theConfig.logLevel)
-			}
-		}
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
 	}
-	//fmt.Println(theConfig)
+	return !info.IsDir()
 }
 
 var singleTon sync.Once
