@@ -14,12 +14,12 @@ go get -u "github.com/en-vee/alog"
 
 ## Configuration (alog.conf)
 ```shell
-fileName = "myapp.log"
-filePath = "/var/log/myapp"
-# Valid Values = TRACE|DEBUG|INFO|WARN|ERROR|CRITICAL
-logLevel = "INFO"
+alog {
+    fileName = "C://Temp//axlrate1.log" # Name, including the full path, of the file to which the log is to be written
+    logLevel = "TRACE" # Valid Values = TRACE|DEBUG|INFO|WARN|ERROR|CRITICAL
+}
 ```
-The config options in the above file are self-explanatory.
+* The config options in the above file are self-explanatory
 
 ## How it Works
 * At startup (in the package init function), it first looks for an alog.conf in the current directory.  
@@ -53,5 +53,4 @@ alog.Critical(string, ...interface{})
 
 
 ## Other package(s) used
-Hashicorp HCL
-golang based library for levelled logging
+github.com/en-vee/aconf - golang based library for parsing/unmarshaling HOCON files
