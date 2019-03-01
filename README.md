@@ -26,10 +26,7 @@ alog {
 ```go
 import "github.com/en-vee/alog"
 ```
-* Set the log level (Can only be done once per run)
-```go
-alog.SetLogLevel(INFO)
-```
+* Create a configuration file as shown above
 * Log at the desired level
 ```go
 alog.Info("This is an INFO message")
