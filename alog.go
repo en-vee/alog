@@ -115,7 +115,8 @@ func init() {
 
 	SetLogLevel(logLevel)
 	log.SetOutput(logDestination)
-
+	log.SetPrefix(logLevelIntToStringMap[logLevel] + " - ")
+	log.SetFlags(log.Ldate | log.Ltime)
 }
 
 func fileExists(filename string) bool {
@@ -176,19 +177,25 @@ func SetLogLevel(level LogLevel) error {
 
 // noOpLogMsg is just an empty (No Operation) implementation which does nothing.
 // It is needed with full signature so that it can be set into a function value which is compatible with the actual log.Printf method
-func noOpLogMsg(level LogLevel, mmsg string, objs ...interface{}) {}
+func noOpLogMsg(level LogLevel, msg string, objs ...interface{}) {}
 
 // logMsg performs actual logging to a destination when used as a function value for a specific log level
 func logMsg(level LogLevel, msg string, objs ...interface{}) {
-	//log.SetPrefix(logLevelIntToStringMap[level])
-	log.Printf("%-12s - %s\n", logLevelIntToStringMap[level], msg)
+
+	if len(objs) == 0 {
+		log.Printf("- " + msg)
+	} else {
+		log.Printf("- "+msg, objs)
+	}
+
+	//log.Printf("%-12s - %s\n", logLevelIntToStringMap[level], msg)
 }
 
 func Trace(msg string, objs ...interface{}) {
 	var level LogLevel = TRACE
 	// Select Function based on level
 	logFunc := logFuncsSlice[level]
-	logFunc(level, msg, objs...)
+	logFunc(level, msg, objs)
 }
 
 func Debug(msg string, objs ...interface{}) {
