@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/en-vee/aconf"
@@ -102,7 +103,8 @@ func init() {
 			if len(alogConfig.Alog.FileName) != 0 {
 				logDestination, err = os.OpenFile(alogConfig.Alog.FileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "alog: unable to open log file : "+alogConfig.Alog.FileName+". Error : "+err.Error())
+					fmt.Fprintf(os.Stderr, "alog: unable to open log file : "+alogConfig.Alog.FileName+". Error : "+err.Error()+"\n")
+					fmt.Fprintf(os.Stderr, "alog: using STDOUT for logging\n")
 					logDestination = os.Stdout
 				}
 			}
@@ -115,8 +117,8 @@ func init() {
 
 	SetLogLevel(logLevel)
 	log.SetOutput(logDestination)
-	log.SetPrefix(logLevelIntToStringMap[logLevel] + " - ")
-	log.SetFlags(log.Ldate | log.Ltime)
+	//log.SetPrefix(logLevelIntToStringMap[logLevel] + " - ")
+	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
 }
 
 func fileExists(filename string) bool {
@@ -182,12 +184,20 @@ func noOpLogMsg(level LogLevel, msg string, objs ...interface{}) {}
 // logMsg performs actual logging to a destination when used as a function value for a specific log level
 func logMsg(level LogLevel, msg string, objs ...interface{}) {
 
-	if len(objs) == 0 {
-		log.Printf("- " + msg)
-	} else {
-		log.Printf("- "+msg, objs)
-	}
+	var sb strings.Builder
 
+	sb.WriteString("- ")
+	sb.WriteString(logLevelIntToStringMap[level])
+	sb.WriteString("- ")
+	sb.WriteString(msg)
+
+	m := sb.String()
+
+	if len(objs) > 0 {
+		log.Printf(m, objs)
+	} else {
+		log.Printf(m)
+	}
 	//log.Printf("%-12s - %s\n", logLevelIntToStringMap[level], msg)
 }
 
@@ -195,7 +205,7 @@ func Trace(msg string, objs ...interface{}) {
 	var level LogLevel = TRACE
 	// Select Function based on level
 	logFunc := logFuncsSlice[level]
-	logFunc(level, msg, objs)
+	logFunc(level, msg, objs...)
 }
 
 func Debug(msg string, objs ...interface{}) {
