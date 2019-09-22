@@ -194,7 +194,7 @@ func logMsg(level LogLevel, msg string, objs ...interface{}) {
 	m := sb.String()
 
 	if len(objs) > 0 {
-		log.Printf(m, objs)
+		log.Printf(m, objs...)
 	} else {
 		log.Printf(m)
 	}
