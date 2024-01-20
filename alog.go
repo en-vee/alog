@@ -146,13 +146,7 @@ func (ie *InvalidLogLevelError) Error() string {
 	return fmt.Sprintf("Invalid Log Level : %v. Valid Values are TRACE|DEBUG|INFO|WARN|ERROR|CRITICAL", ie.got)
 }
 
-func SetLogLevel(level LogLevel) error {
-
-	if level > CRITICAL {
-		return &InvalidLogLevelError{level}
-	}
-
-	setLogLevel := func() {
+func setLogLevel(level LogLevel) {
 		if level > CRITICAL {
 			level = CRITICAL
 		}
@@ -170,9 +164,15 @@ func SetLogLevel(level LogLevel) error {
 		for i := range p {
 			p[i] = logMsg
 		}
+}
+
+func SetLogLevel(level LogLevel) error {
+
+	if level > CRITICAL {
+		return &InvalidLogLevelError{level}
 	}
 
-	singleTon.Do(setLogLevel)
+	setLogLevel(level)
 
 	return nil
 }
