@@ -177,6 +177,12 @@ func SetLogLevel(level LogLevel) error {
 	return nil
 }
 
+func SetLogDestination(w io.Writer) {
+	singleTon.Do(func(){
+		log.SetOutput(w)
+	})
+}
+
 // noOpLogMsg is just an empty (No Operation) implementation which does nothing.
 // It is needed with full signature so that it can be set into a function value which is compatible with the actual log.Printf method
 func noOpLogMsg(level LogLevel, msg string, objs ...interface{}) {}
