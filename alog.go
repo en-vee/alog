@@ -1,4 +1,4 @@
-// Package log provides levelled logging functionality.
+// Package alog provides levelled logging functionality.
 // It also allows one to configure the destination of the logs. The default is stdout.
 // It looks for a logger configuration file alog.conf first in the current directory and then in the directory defined by ALOG_CONF_DIR
 // If it does not find a logger configuration file in any of these locations, then it uses STDOUT as the logging destination
@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 	"sync"
-
+	"io"
 	"github.com/en-vee/aconf"
 )
 
